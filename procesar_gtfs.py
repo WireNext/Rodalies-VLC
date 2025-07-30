@@ -3,7 +3,6 @@ import requests
 import csv
 import json
 import os
-from collections import defaultdict
 
 url = "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
 
@@ -18,9 +17,18 @@ with zipfile.ZipFile("gtfs.zip", 'r') as zip_ref:
 
 os.makedirs("gtfs", exist_ok=True)
 
+# ✅ Route IDs deseados
+rutas_deseadas = {
+    "40T0001C1", "40T0002C1", "40T0005C2", "40T0006C2", "40T0007C3", "40T0008C3",
+    "40T0009C4", "40T0010C4", "40T0011C5", "40T0012C5", "40T0013C6", "40T0014C6",
+    "40T0015C6", "40T0016C6", "40T0017C3", "40T0018C3", "40T0019C5", "40T0020C5",
+    "40T0021C6", "40T0022C6", "40T0023C2", "40T0024C2", "40T0025C3", "40T0026C3",
+    "40T0027C1", "40T0028C1", "40T0029C2", "40T0030C2", "40T0031C5", "40T0032C5",
+    "40T0033C3", "40T0034C3", "40T0035C2", "40T0036C2", "40T0037C2", "40T0038C2",
+    "41T0001C1", "41T0002C1", "41T0005C3", "41T0006C3", "41T0009C2", "41T0010C2"
+}
 
-rutas_deseadas = {"40T0001C1", "40T0002C1", "40T0005C2", "40T0006C2", "40T0007C3", "40T0008C3", "40T0009C4", "40T0010C4", "40T0011C5", "40T0012C5", "40T0013C6", "40T0014C6", "40T0015C6", "40T0016C6", "40T0017C3", "40T0018C3", "40T0019C5", "40T0020C5", "40T0021C6", "40T0022C6", "40T0023C2", "40T0024C2", "40T0025C3", "40T0026C3", "40T0027C1", "40T0028C1", "40T0029C2", "40T0030C2", "40T0031C5", "40T0032C5", "40T0033C3", "40T0034C3", "40T0035C2", "40T0036C2", "40T0037C2", "40T0038C2", "41T0001C1", "41T0002C1", "41T0005C3", "41T0006C3", "41T0009C2", "41T0010C2"}
-route_ids = set()
+# 1. Filtrar rutas
 with open("gtfs/routes.txt", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     routes_filtradas = [row for row in reader if row["route_id"] in rutas_deseadas]
@@ -28,7 +36,6 @@ with open("gtfs/routes.txt", encoding="utf-8") as f:
 
 # 2. Filtrar trips por route_id
 trip_ids = set()
-shape_ids = set()
 with open("gtfs/trips.txt", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     trips_filtrados = []
@@ -36,7 +43,6 @@ with open("gtfs/trips.txt", encoding="utf-8") as f:
         if row["route_id"] in route_ids:
             trips_filtrados.append(row)
             trip_ids.add(row["trip_id"])
-            shape_ids.add(row["shape_id"])
 
 # 3. Filtrar stop_times por trip_id
 stop_ids = set()
@@ -53,23 +59,7 @@ with open("gtfs/stops.txt", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     stops_filtrados = [row for row in reader if row["stop_id"] in stop_ids]
 
-# 5. Filtrar shapes por shape_id y organizar como JSON
-shapes_json = defaultdict(list)
-with open("gtfs/shapes.txt", encoding="utf-8") as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        if row["shape_id"] in shape_ids:
-            shapes_json[row["shape_id"]].append({
-                "shape_pt_lat": row["shape_pt_lat"],
-                "shape_pt_lon": row["shape_pt_lon"],
-                "shape_pt_sequence": row["shape_pt_sequence"]
-            })
-
-# Ordenar por secuencia
-for puntos in shapes_json.values():
-    puntos.sort(key=lambda p: int(p["shape_pt_sequence"]))
-
-# 6. Guardar resultados
+# 5. Guardar resultados
 def guardar(nombre, datos):
     with open(f"gtfs/{nombre}.json", "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
@@ -79,4 +69,3 @@ guardar("routes", routes_filtradas)
 guardar("trips", trips_filtrados)
 guardar("stop_times", stop_times_filtrados)
 guardar("stops", stops_filtrados)
-guardar("shapes", shapes_json)
