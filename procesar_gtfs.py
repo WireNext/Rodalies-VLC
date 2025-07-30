@@ -6,17 +6,17 @@ import os
 
 url = "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip"
 
-print("📦 Descargando GTFS...")
+print("📦 Descargando fomento_transit...")
 r = requests.get(url)
-with open("gtfs.zip", "wb") as f:
+with open("fomento_transit.zip", "wb") as f:
     f.write(r.content)
 
 # Asegurarse de que existe la carpeta antes de extraer
-os.makedirs("gtfs", exist_ok=True)
+os.makedirs("fomento_transit", exist_ok=True)
 
 print("📂 Extrayendo archivos...")
-with zipfile.ZipFile("gtfs.zip", 'r') as zip_ref:
-    zip_ref.extractall("gtfs")
+with zipfile.ZipFile("fomento_transit.zip", 'r') as zip_ref:
+    zip_ref.extractall("fomento_transit")
 
 # ✅ Route IDs deseados
 rutas_deseadas = {
@@ -31,14 +31,14 @@ rutas_deseadas = {
 
 # 1. Filtrar rutas
 route_ids = set()
-with open("gtfs/routes.txt", encoding="utf-8-sig") as f:
+with open("fomento_transit/routes.txt", encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
     routes_filtradas = [row for row in reader if row["route_id"] in rutas_deseadas]
     route_ids = {row["route_id"] for row in routes_filtradas}
 
 # 2. Filtrar trips por route_id
 trip_ids = set()
-with open("gtfs/trips.txt", encoding="utf-8-sig") as f:
+with open("fomento_transit/trips.txt", encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
     trips_filtrados = []
     for row in reader:
@@ -48,7 +48,7 @@ with open("gtfs/trips.txt", encoding="utf-8-sig") as f:
 
 # 3. Filtrar stop_times por trip_id
 stop_ids = set()
-with open("gtfs/stop_times.txt", encoding="utf-8-sig") as f:
+with open("fomento_transit/stop_times.txt", encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
     stop_times_filtrados = []
     for row in reader:
@@ -57,13 +57,13 @@ with open("gtfs/stop_times.txt", encoding="utf-8-sig") as f:
             stop_ids.add(row["stop_id"])
 
 # 4. Filtrar stops por stop_id
-with open("gtfs/stops.txt", encoding="utf-8-sig") as f:
+with open("fomento_transit/stops.txt", encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
     stops_filtrados = [row for row in reader if row["stop_id"] in stop_ids]
 
 # 5. Guardar resultados
 def guardar(nombre, datos):
-    with open(f"gtfs/{nombre}.json", "w", encoding="utf-8") as f:
+    with open(f"fomento_transit/{nombre}.json", "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
     print(f"✅ Guardado {nombre}.json con {len(datos)} registros")
 
