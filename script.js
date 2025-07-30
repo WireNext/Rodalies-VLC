@@ -1,17 +1,16 @@
 async function cargarDatosfomento_transit() {
   try {
     const baseURL = 'fomento_transit/';
-    const [routes, trips, stops, stopTimes, calendarDates, shapes] = await Promise.all([
+    const [routes, trips, stops, stopTimes, calendar] = await Promise.all([
       fetch(baseURL + 'routes.json').then(r => r.json()),
       fetch(baseURL + 'trips.json').then(r => r.json()),
       fetch(baseURL + 'stops.json').then(r => r.json()),
       fetch(baseURL + 'stop_times.json').then(r => r.json()),
-      fetch(baseURL + 'calendar_dates.json').then(r => r.json()),
-      fetch(baseURL + 'shapes.json').then(r => r.json())
+      fetch(baseURL + 'calendar.json').then(r => r.json())
     ]);
 
     console.log("✅ Datos cargados");
-    iniciarMapa(stops, stopTimes, trips, routes, shapes);
+    iniciarMapa(stops, stopTimes, trips, routes, );
 
   } catch (e) {
     console.error("❌ Error cargando fomento_transit:", e);
@@ -19,7 +18,7 @@ async function cargarDatosfomento_transit() {
   }
 }
 
-function iniciarMapa(stops, stopTimes, trips, routes, shapes) {
+function iniciarMapa(stops, stopTimes, trips, routes, ) {
   const map = L.map('map').setView([39.4699, -0.3763], 14); // Valencia
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -136,35 +135,6 @@ function iniciarMapa(stops, stopTimes, trips, routes, shapes) {
   });
 
   map.addLayer(clusterGroup);
-
-  // Dibujar shapes con route_color
-  for (const shapeId in shapes) {
-    const puntos = shapes[shapeId];
-
-    puntos.sort((a, b) => parseInt(a.shape_pt_sequence) - parseInt(b.shape_pt_sequence));
-
-    const latlngs = puntos.map(pt => [
-      parseFloat(pt.shape_pt_lat),
-      parseFloat(pt.shape_pt_lon)
-    ]);
-
-    // Buscar trip y ruta correspondiente
-    const trip = trips.find(t => t.shape_id === shapeId);
-    let color = '#0078A8'; // color por defecto
-
-    if (trip) {
-      const ruta = routes.find(r => r.route_id === trip.route_id);
-      if (ruta && ruta.route_color) {
-        color = '#' + ruta.route_color;
-      }
-    }
-
-    L.polyline(latlngs, {
-      color,
-      weight: 3,
-      opacity: 0.7
-    }).addTo(map);
-  }
 }
 
 cargarDatosfomento_transit();
