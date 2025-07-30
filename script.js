@@ -1,6 +1,6 @@
-async function cargarDatosGTFS() {
+async function cargarDatosfomento_transit() {
   try {
-    const baseURL = 'gtfs/';
+    const baseURL = 'fomento_transit/';
     const [routes, trips, stops, stopTimes, calendarDates, shapes] = await Promise.all([
       fetch(baseURL + 'routes.json').then(r => r.json()),
       fetch(baseURL + 'trips.json').then(r => r.json()),
@@ -14,7 +14,7 @@ async function cargarDatosGTFS() {
     iniciarMapa(stops, stopTimes, trips, routes, shapes);
 
   } catch (e) {
-    console.error("❌ Error cargando GTFS:", e);
+    console.error("❌ Error cargando fomento_transit:", e);
     alert("Error cargando datos. Mira la consola.");
   }
 }
@@ -167,4 +167,4 @@ function iniciarMapa(stops, stopTimes, trips, routes, shapes) {
   }
 }
 
-cargarDatosGTFS();
+cargarDatosfomento_transit();
