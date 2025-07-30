@@ -10,7 +10,7 @@ async function cargarDatosfomento_transit() {
     ]);
 
     console.log("✅ Datos cargados");
-    iniciarMapa(stops, stopTimes, trips, routes, );
+    iniciarMapa(stops, stopTimes, trips, routes);
 
   } catch (e) {
     console.error("❌ Error cargando fomento_transit:", e);
@@ -18,7 +18,7 @@ async function cargarDatosfomento_transit() {
   }
 }
 
-function iniciarMapa(stops, stopTimes, trips, routes, ) {
+function iniciarMapa(stops, stopTimes, trips, routes) {
   const map = L.map('map').setView([39.4699, -0.3763], 14); // Valencia
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
